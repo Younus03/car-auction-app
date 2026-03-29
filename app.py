@@ -22,14 +22,20 @@ def register():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute(
-            "INSERT INTO users (name, email, password, phone) VALUES (%s, %s, %s, %s)",
-            (name, email, password, phone)
-        )
+        try:
+            cursor.execute(
+                "INSERT INTO users (name, email, password, phone) VALUES (%s, %s, %s, %s)",
+                (name, email, password, phone)
+            )
+            conn.commit()
 
-        conn.commit()
-        cursor.close()
-        conn.close()
+        except Exception as e:
+            print("DB ERROR:", e)
+            conn.rollback()
+
+        finally:
+            cursor.close()
+            conn.close()
 
         return redirect('/')
 
