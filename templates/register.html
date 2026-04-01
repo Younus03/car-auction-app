@@ -30,6 +30,10 @@
                 <p class="support-text">Set up your profile to start submitting detailed car inquiries.</p>
             </div>
 
+            {% if error %}
+            <div class="error-banner">{{ error }}</div>
+            {% endif %}
+
             <form method="POST" class="stack-form">
                 <label>
                     <span>Name</span>

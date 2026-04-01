@@ -1,9 +1,11 @@
+import os
+
 from flask import Flask, render_template, request, redirect, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from db_config import get_db_connection
 
 app = Flask(__name__)
-app.secret_key = "secret_key"
+app.secret_key = os.getenv("FLASK_SECRET_KEY", "change-me-in-production")
 
 
 def ensure_inquiries_table():
@@ -71,6 +73,10 @@ def register():
         except Exception as e:
             print("DB ERROR:", e)
             conn.rollback()
+            return render_template(
+                'register.html',
+                error="We could not create your account right now. Please check your database settings and try again."
+            )
 
         finally:
             cursor.close()
@@ -78,7 +84,7 @@ def register():
 
         return redirect('/')
 
-    return render_template('register.html')
+    return render_template('register.html', error=None)
 
 # Login
 @app.route('/login', methods=['POST'])
@@ -196,4 +202,8 @@ def logout():
 
 if __name__ == '__main__':
     ensure_inquiries_table()
-    app.run(debug=True)
+    app.run(
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", "5000")),
+        debug=os.getenv("FLASK_DEBUG", "false").lower() == "true"
+    )
