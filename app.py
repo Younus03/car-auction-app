@@ -8,7 +8,7 @@ app.secret_key = "secret_key"
 # Home -> Login
 @app.route('/')
 def home():
-    return render_template('login.html')
+    return render_template('login.html', error=None)
 
 # Register Page
 @app.route('/register', methods=['GET', 'POST'])
@@ -60,13 +60,35 @@ def login():
         session['user'] = user['name']
         return redirect('/dashboard')
 
-    return "Invalid credentials ❌"
+    return render_template('login.html', error="Invalid email or password. Please try again.")
 
 # Dashboard
-@app.route('/dashboard')
+@app.route('/dashboard', methods=['GET', 'POST'])
 def dashboard():
     if 'user' in session:
-        return render_template('dashboard.html', user=session['user'])
+        inquiry = None
+
+        if request.method == 'POST':
+            inquiry = {
+                'full_name': request.form['full_name'],
+                'email': request.form['email'],
+                'phone': request.form['phone'],
+                'city': request.form['city'],
+                'car_type': request.form['car_type'],
+                'brand': request.form['brand'],
+                'model': request.form['model'],
+                'budget': request.form['budget'],
+                'color': request.form['color'],
+                'transmission': request.form['transmission'],
+                'fuel_type': request.form['fuel_type'],
+                'ownership': request.form['ownership'],
+                'year_range': request.form['year_range'],
+                'timeline': request.form['timeline'],
+                'features': request.form.get('features', ''),
+                'notes': request.form.get('notes', '')
+            }
+
+        return render_template('dashboard.html', user=session['user'], inquiry=inquiry)
     return redirect('/')
 
 # Logout
