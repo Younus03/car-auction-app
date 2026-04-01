@@ -130,6 +130,7 @@ def dashboard():
                 'notes': request.form.get('notes', '')
             }
 
+            ensure_inquiries_table()
             conn = get_db_connection()
             cursor = conn.cursor()
 
