@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | Car Match</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="page-shell auth-page">
+    <div class="auth-layout register-layout">
+        <section class="auth-visual register-visual">
+            <div class="auth-overlay"></div>
+            <div class="auth-content">
+                <p class="eyebrow">Create your profile</p>
+                <h1>Join a car discovery experience that feels premium from the first click.</h1>
+                <p>
+                    Register once, then collect buyer preferences, shortlist dream cars, and keep
+                    every conversation more structured.
+                </p>
+            </div>
+        </section>
+
+        <section class="auth-card">
+            <div>
+                <p class="eyebrow">Get started</p>
+                <h2>Create account</h2>
+                <p class="support-text">Set up your profile to start submitting detailed car inquiries.</p>
+            </div>
+
+            <form method="POST" class="stack-form">
+                <label>
+                    <span>Name</span>
+                    <input type="text" name="name" placeholder="Your full name" required>
+                </label>
+                <label>
+                    <span>Email</span>
+                    <input type="email" name="email" placeholder="name@example.com" required>
+                </label>
+                <label>
+                    <span>Password</span>
+                    <input type="password" name="password" placeholder="Create a password" required>
+                </label>
+                <label>
+                    <span>Phone</span>
+                    <input type="text" name="phone" placeholder="+91 98765 43210">
+                </label>
+                <button type="submit" class="primary-button">Register</button>
+            </form>
+
+            <p class="inline-link">Already have an account? <a href="/">Login</a></p>
+        </section>
+    </div>
+</body>
+</html>
