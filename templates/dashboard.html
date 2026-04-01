@@ -70,13 +70,18 @@
                 <a class="logout-link" href="/logout">Logout</a>
             </div>
 
-            {% if inquiry %}
-            <div class="success-banner">
+            {% if form_message %}
+            <div class="{% if message_type == 'success' %}success-banner{% else %}error-banner{% endif %}">
+                {% if inquiry and message_type == 'success' %}
                 <h3>Inquiry received for {{ inquiry.brand }} {{ inquiry.model }}</h3>
                 <p>
                     We captured your preferred {{ inquiry.color }} {{ inquiry.car_type|lower }} with
                     {{ inquiry.transmission|lower }} transmission and a budget of {{ inquiry.budget }}.
                 </p>
+                {% else %}
+                <h3>Inquiry could not be saved</h3>
+                <p>{{ form_message }}</p>
+                {% endif %}
             </div>
             {% endif %}
 

@@ -5,6 +5,45 @@ from db_config import get_db_connection
 app = Flask(__name__)
 app.secret_key = "secret_key"
 
+
+def ensure_inquiries_table():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS car_inquiries (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NULL,
+                full_name VARCHAR(150) NOT NULL,
+                email VARCHAR(150) NOT NULL,
+                phone VARCHAR(30) NOT NULL,
+                city VARCHAR(100) NOT NULL,
+                car_type VARCHAR(100) NOT NULL,
+                brand VARCHAR(100) NOT NULL,
+                model VARCHAR(100) NOT NULL,
+                budget VARCHAR(100) NOT NULL,
+                color VARCHAR(50) NOT NULL,
+                transmission VARCHAR(50) NOT NULL,
+                fuel_type VARCHAR(50) NOT NULL,
+                ownership VARCHAR(100) NOT NULL,
+                year_range VARCHAR(50) NOT NULL,
+                timeline VARCHAR(100) NOT NULL,
+                features TEXT,
+                notes TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT fk_car_inquiries_user
+                    FOREIGN KEY (user_id) REFERENCES users(id)
+                    ON DELETE SET NULL
+            )
+            """
+        )
+        conn.commit()
+    finally:
+        cursor.close()
+        conn.close()
+
 # Home -> Login
 @app.route('/')
 def home():
@@ -58,6 +97,7 @@ def login():
 
     if user and check_password_hash(user['password'], password):
         session['user'] = user['name']
+        session['user_id'] = user.get('id')
         return redirect('/dashboard')
 
     return render_template('login.html', error="Invalid email or password. Please try again.")
@@ -67,6 +107,8 @@ def login():
 def dashboard():
     if 'user' in session:
         inquiry = None
+        form_message = None
+        message_type = None
 
         if request.method == 'POST':
             inquiry = {
@@ -88,14 +130,69 @@ def dashboard():
                 'notes': request.form.get('notes', '')
             }
 
-        return render_template('dashboard.html', user=session['user'], inquiry=inquiry)
+            conn = get_db_connection()
+            cursor = conn.cursor()
+
+            try:
+                cursor.execute(
+                    """
+                    INSERT INTO car_inquiries (
+                        user_id, full_name, email, phone, city, car_type, brand, model,
+                        budget, color, transmission, fuel_type, ownership, year_range,
+                        timeline, features, notes
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        session.get('user_id'),
+                        inquiry['full_name'],
+                        inquiry['email'],
+                        inquiry['phone'],
+                        inquiry['city'],
+                        inquiry['car_type'],
+                        inquiry['brand'],
+                        inquiry['model'],
+                        inquiry['budget'],
+                        inquiry['color'],
+                        inquiry['transmission'],
+                        inquiry['fuel_type'],
+                        inquiry['ownership'],
+                        inquiry['year_range'],
+                        inquiry['timeline'],
+                        inquiry['features'],
+                        inquiry['notes']
+                    )
+                )
+                conn.commit()
+                form_message = (
+                    f"Inquiry saved for {inquiry['brand']} {inquiry['model']}. "
+                    "Your buyer preferences are now stored in MySQL."
+                )
+                message_type = "success"
+            except Exception as e:
+                print("INQUIRY DB ERROR:", e)
+                conn.rollback()
+                form_message = "We could not save the inquiry right now. Please check your database setup and try again."
+                message_type = "error"
+            finally:
+                cursor.close()
+                conn.close()
+
+        return render_template(
+            'dashboard.html',
+            user=session['user'],
+            inquiry=inquiry,
+            form_message=form_message,
+            message_type=message_type
+        )
     return redirect('/')
 
 # Logout
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    session.pop('user_id', None)
     return redirect('/')
 
 if __name__ == '__main__':
+    ensure_inquiries_table()
     app.run(debug=True)
